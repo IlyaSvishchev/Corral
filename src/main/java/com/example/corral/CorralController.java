@@ -7,16 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 @Controller
 public class CorralController {
     @Autowired
     NewsRepo newsRepository;
-    private String title;
-    private String full_text;
-    private Model model;
 
     @GetMapping("/home")
     public String home(){
@@ -38,9 +39,20 @@ public class CorralController {
         return "news-add";
     }
     @PostMapping("/news/add")
-    public String addData(@RequestParam String name, @RequestParam String fullText, Model model){
+    public String addData(@RequestParam String name, @RequestParam String fullText){
         News post = new News(name, fullText);
         newsRepository.save(post);
         return "news-main";
+    }
+    @GetMapping("/news/{id}")
+    public String newsDetails(@PathVariable(value = "id") long id, Model model) {
+        Optional<News> newsDetails = newsRepository.findById(id);
+        ArrayList<News> result = new ArrayList<>();
+        newsDetails.ifPresent(result::add);
+        model.addAttribute("newsDetails", result);
+        if(!newsRepository.existsById(id)){
+            return "news-main";
+        }
+        return "news-details";
     }
 }
