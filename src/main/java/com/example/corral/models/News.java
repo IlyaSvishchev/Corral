@@ -23,7 +23,16 @@ public class News {
     )
     private Long id;
 
-    private String name;
+    public String name;
+
+    public String getFullText() {
+        return fullText;
+    }
+
+    public void setFullText(String fullText) {
+        this.fullText = fullText;
+    }
+
     @Column(name = "full_text")
     public String fullText;
     public News() {

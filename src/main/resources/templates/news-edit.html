@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <div th:insert="blocks/header :: header"></div>
+    <div th:each="el : ${newsDetails}" class="alert alert-info mt-2">
+        <div class="container mt-5 mb-5">
+            <form method="post">
+                <input name="name" th:value="${el.name}" type="text"><br>
+                <textarea name="fullText" th:text="${el.fullText}"/><br>
+                <button type="submit" class="btn btn-success">Обновить</button>
+            </form>
+        </div>
+    </div>
+</head>
+<body>
+
+</body>
+</html>
