@@ -3,8 +3,8 @@ package com.example.corral;
 
 import com.example.corral.models.News;
 import com.example.corral.repos.NewsRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,9 +16,12 @@ import java.util.Optional;
 
 @Controller
 public class CorralController {
-    @Autowired
+    final
     NewsRepo newsRepository;
 
+    public CorralController(NewsRepo newsRepository) {
+        this.newsRepository = newsRepository;
+    }
     @GetMapping("/home")
     public String home() {
         return "corral-main";
@@ -42,50 +45,45 @@ public class CorralController {
     }
 
     @PostMapping("/news/add")
-    public String addData(@RequestParam String name, @RequestParam String fullText) {
-        News post = new News(name, fullText);
+    public String addData(@RequestParam String name, @RequestParam String fullText, @RequestParam String author) {
+        News post = new News(name, fullText, author);
         newsRepository.save(post);
         return "news-main";
     }
-
-    @GetMapping("/news/{id}")
-    public String newsDetails(@PathVariable(value = "id") long id, Model model) {
-        Optional<News> newsDetails = newsRepository.findById(id);
-        ArrayList<News> result = new ArrayList<>();
-        newsDetails.ifPresent(result::add);
-        model.addAttribute("newsDetails", result);
-        if (!newsRepository.existsById(id)) {
+    @GetMapping("/news/{name}")
+    public String newsOptional(@PathVariable(value="name") String name, Model model){
+        Optional<News> newsDetails = newsRepository.findByName(name);
+        ArrayList<News> res = new ArrayList<>();
+        newsDetails.ifPresent(res::add);
+        model.addAttribute("newsDetails", res);
+        if(!newsRepository.existsByName(name)){
             return "news-main";
         }
         return "news-details";
     }
-
-    @GetMapping("/news/{id}/edit")
-    public String newsEdit(@PathVariable(value = "id") long id, Model model) {
-        Optional<News> newsDetails = newsRepository.findById(id);
-        ArrayList<News> result = new ArrayList<>();
-        newsDetails.ifPresent(result::add);
-        model.addAttribute("newsDetails", result);
-        if (!newsRepository.existsById(id)) {
-            return "news-main";
+    @GetMapping("/news/{name}/edit")
+    public String newsEdit(@PathVariable(value="name") String name, Model model){
+        Optional<News> newsDetails = newsRepository.findByName(name);
+        ArrayList<News> res = new ArrayList<>();
+        newsDetails.ifPresent(res::add);
+        model.addAttribute("newsDetails", res);
+        if(!newsRepository.existsByName(name)){
+            return "news-fail";
         }
         return "news-edit";
-
     }
-    @PostMapping("/news/{id}/edit")
-    public String updateData(@PathVariable(value = "id") long id, @RequestParam String name, @RequestParam String fullText) {
-        News newsDetails = newsRepository.findById(id).orElseThrow();
-        newsDetails.setName(name);
+    @PostMapping("/news/{name}/edit")
+    public String updateData(@PathVariable(value = "name") String name, @RequestParam String author, @RequestParam String fullText ){
+        News newsDetails = newsRepository.findByName(name).orElseThrow();
+        newsDetails.setAuthor(author);
         newsDetails.setFullText(fullText);
         newsRepository.save(newsDetails);
-        return "news-edit";
-
+        return "redirect:/news/{name}";
     }
-    @GetMapping("/news/{id}/remove")
-    public String removeData(@PathVariable(value = "id") long id, Model model){
-        newsRepository.deleteById(id);
+    @GetMapping("/news/{name}/remove")
+    @Transactional
+    public String removeData(@PathVariable(value = "name") String name){
+        newsRepository.deleteByName(name);
         return "news-remove";
     }
-
-
 }

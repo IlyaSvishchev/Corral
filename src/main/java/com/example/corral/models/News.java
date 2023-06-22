@@ -1,15 +1,12 @@
 package com.example.corral.models;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
-import org.hibernate.boot.model.relational.Sequence;
 
-@Entity
+@Entity(name = "news")
 public class News {
     @Id
     @GeneratedValue(generator = "sequence-generator")
@@ -24,6 +21,15 @@ public class News {
     private Long id;
 
     public String name;
+    public String author;
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public String getFullText() {
         return fullText;
@@ -38,7 +44,8 @@ public class News {
     public News() {
     }
 
-    public News(String name, String fullText) {
+    public News(String name, String fullText,String author) {
+        this.author=author;
         this.name=name;
         this.fullText = fullText;
     }
@@ -58,9 +65,5 @@ public class News {
     public void setName(String name) {
         this.name = name;
     }
-
-
-
-
 
 }
